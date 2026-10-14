@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POS</title>
+<link rel="icon" href="/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --esp:#1b1410;--roast:#6b4226;--car:#c8863f;--card2:#a96d2c;--cream:#f6efe4;--tile:#fbf6ee;--line:#e6d9c6;--ink:#2b1b12;--muted:#8a7a6c;--green:#2f8f5b;--red:#c0392b;
+  --bg: linear-gradient(180deg,#f6efe4,#efe3cf);
+}
+.dark{
+  --esp:#0f0f11;--roast:#c6a67c;--car:#e5b36e;--card2:#d19a56;--cream:#141414;--tile:#1c1c1c;--line:#2a2a2a;--ink:#f6efe4;--muted:#9aa0a6;--green:#3bb08a;--red:#ff6b6b;
+  background:linear-gradient(180deg,#0f0f10,#141414);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Poppins, "Segoe UI", system-ui, sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+header{background:var(--esp);color:#fff;display:flex;align-items:center;gap:18px;padding:12px 20px;box-shadow:0 6px 20px rgba(11,9,7,.12)}
+header img{width:56px;height:56px;border-radius:10px}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.toggle{background:transparent;border:1px solid rgba(255,255,255,.08);color:#fff;padding:8px 10px;border-radius:8px;cursor:pointer}
+.container{max-width:1400px;margin:18px auto;padding:0 18px}
+main{display:grid;grid-template-columns:6fr 5fr 4fr;gap:18px}
+@media(max-width:1000px){main{grid-template-columns:1fr}}
+.panel{background:rgba(255,255,255,.98);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(43,27,18,.06)}
+.dark .panel{background:rgba(20,20,20,.9);border-color:var(--line)}
+.panel h2{margin:0 0 10px;font-size:13px;letter-spacing:1px;color:var(--roast);padding-bottom:8px;border-bottom:1px solid var(--line)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.chip{background:transparent;border:1px solid var(--line);padding:8px 12px;border-radius:999px;cursor:pointer}
+.chip.on{background:var(--esp);color:#fff;border-color:var(--esp)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.tile{background:var(--tile);border:1px solid var(--line);border-radius:12px;min-height:120px;display:flex;align-items:center;gap:12px;padding:10px}
+.tile img{width:72px;height:72px;object-fit:cover;border-radius:12px;box-shadow:0 6px 18px rgba(43,27,18,.08)}
+.tile .info{flex:1}
+.tile .name{font-weight:600;font-size:15px;margin-bottom:6px}
+.tile .price{color:var(--car);font-weight:700}
+.tile:hover{transform:translateY(-6px);transition:all .18s ease;box-shadow:0 18px 40px rgba(43,27,18,.12)}
+.sizes{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.qty{display:flex;align-items:center;gap:8px;margin-top:12px}
+.qty input{width:64px;text-align:center;font-weight:700;padding:8px;border:1px solid var(--line);border-radius:8px}
+.btn-accent{background:var(--car);color:#fff;border:none;padding:10px 12px;border-radius:8px;cursor:pointer}
+.btn-go{background:var(--green);color:#fff;border:none;padding:12px;border-radius:8px;width:100%;font-weight:700}
+.btn-red{background:#fbe9e6;color:var(--red);border:none;padding:10px;border-radius:8px}
+.table{width:100%;border-collapse:collapse}
+.table th{background:transparent;color:var(--muted);font-size:12px;text-align:left;padding:8px}
+.table td{padding:10px;text-align:right}
+.box{background:transparent;border-radius:8px;padding:12px 10px;margin-top:12px}
+.row{display:flex;justify-content:space-between;align-items:center;margin:6px 0}
+.big{font-size:26px;font-weight:800;color:var(--green)}
+.rcpt-area{display:flex;gap:18px;align-items:center}
+.modal{position:fixed;inset:0;background:rgba(11,9,7,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal.show{display:flex}
+.dlg{background:var(--panel-bg,#fff);border-radius:12px;padding:20px;max-width:680px;width:100%;max-height:94vh;overflow:auto}
+.dark .dlg{background:#111}
+.methods{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.err{color:var(--red);font-weight:600;margin-top:8px}
+.footer{margin-top:14px;display:flex;gap:10px}
+select,input,button{font-family:inherit}
+/* extra polish */
+.tile{transition:transform .14s ease,box-shadow .14s ease}
+.tile .badge{font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <img src="/logo.png" alt="logo">
+  <div>
+    <h1 id="biz" style="margin:0;font-size:18px"></h1>
+    <small id="sub" style="color:var(--car)"></small>
+  </div>
+  <div class="header-right">
+    <div style="text-align:right"><div id="clock" style="font-weight:700"></div><small id="cashier"></small></div>
+    <button id="themeToggle" class="toggle">🌙</button>
+  </div>
+</header>
+<div class="container">
+<main>
+  <section class="panel">
+    <h2>MENU</h2>
+    <div class="chips" id="chips"></div>
+    <div class="grid" id="grid"></div>
+    <div class="pick" id="picked">Tap an item to select it</div>
+    <div class="sizes" id="sizes"></div>
+    <div class="qty">Quantity
+      <button onclick="bump(-1)">-</button><input id="qty" value="1" inputmode="numeric"><button onclick="bump(1)">+</button>
+      <button class="btn-accent" onclick="addItem()">ADD TO ORDER</button>
+    </div>
+  </section>
+  <section class="panel">
+    <h2>CURRENT ORDER</h2>
+    <table class="table"><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th style="text-align:right">Subtotal</th></tr></thead><tbody id="rows"></tbody></table>
+    <div class="empty" id="none">No items yet</div>
+    <div style="display:flex;gap:8px;margin-top:8px"><button class="btn-red" onclick="removeSel()">Remove Selected</button><button onclick="clearCart()">Clear Order</button></div>
+    <div style="margin-top:10px">Discount <select id="disc" onchange="refresh()"></select></div>
+    <div class="box">
+      <div class="row"><span>Subtotal</span><span id="sub_t">₱0.00</span></div>
+      <div class="row"><span>Discount</span><span id="disc_t">₱0.00</span></div>
+      <div class="row"><span id="vat_l">VAT</span><span id="vat_t">₱0.00</span></div>
+      <hr>
+      <div class="row"><span style="font-weight:800">TOTAL</span><span id="tot_t">₱0.00</span></div>
+    </div>
+  </section>
+  <section class="panel">
+    <h2>TRANSACTION</h2>
+    <div class="box" style="margin-top:0"><div class="muted">AMOUNT DUE</div><div class="big" id="due">₱0.00</div><div class="muted" id="incl"></div></div>
+    <div style="margin-top:12px"><button id="payBtn" class="btn-go" onclick="openPay()">💳 PROCEED TO PAYMENT</button></div>
+    <div style="margin-top:8px;display:flex;gap:8px"><select id="orderType"><option>Takeout</option><option>Dine-in</option></select><select id="serviceMode"><option>Counter Pickup</option><option>Table Service</option></select></div>
+    <div style="margin-top:8px"><button onclick="clearCart()">New Transaction</button></div>
+    <div class="box"><div class="muted">TODAY</div><div id="st_n">Transactions: 0</div><div style="font-weight:700;font-size:17px" id="st_s">Sales: ₱0.00</div></div>
+    <div style="margin-top:8px"><button onclick="openChart()">Chart</button></div>
+  </section>
+</main>
+</div>
+
+<div class="modal" id="pay"><div class="dlg">
+  <div class="box" style="text-align:center;margin-top:0"><div class="muted">TOTAL AMOUNT</div><div class="big" id="p_tot"></div><div class="muted" id="p_note"></div></div>
+  <b>Select a payment method</b>
+  <div class="methods" id="methods"></div>
+  <b id="f_label">Payment details</b>
+  <input id="field" disabled autocomplete="off"><div class="muted" id="f_hint">Choose a payment method first.</div>
+  <div class="err" id="p_err"></div>
+  <div class="footer"><button class="btn-go" style="flex:1" onclick="confirmPay()">CONFIRM PAYMENT</button><button onclick="closeM('pay')">Cancel</button></div>
+</div></div>
+
+<div class="modal" id="rcpt"><div class="dlg">
+  <h2 style="text-align:center;color:var(--green);margin:0 0 8px">PAYMENT SUCCESSFUL</h2>
+  <div class="muted" style="text-align:center;margin-bottom:12px" id="r_res"></div>
+  <div class="rcpt-area"><pre id="r_txt" style="flex:1;white-space:pre-wrap"></pre>
+    <div class="side"><img id="r_qr" width="160" height="160" alt="QR"><div class="muted">Scan for your receipt</div>
+      <a id="r_pdf" href="#"><button>Save PDF Receipt</button></a>
+      <button class="btn-go" onclick="closeM('rcpt')">NEW TRANSACTION</button></div></div>
+</div></div>
+
+<div class="modal" id="chart"><div class="dlg">
+  <h2 style="margin:0 0 8px">Sales Report</h2>
+  <div class="muted" id="c_sum"></div>
+  <div id="c_body"></div>
+  <div style="margin-top:12px"><button onclick="closeM('chart')">Close</button></div>
+</div></div>
+
+<script>
+let M, cart = [], cat = 0, picked = null, pickedSize = null, selRow = null, method = null;
+const $ = id => document.getElementById(id);
+const post = (u, b) => fetch(u, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(b)}).then(async r => {const d = await r.json(); if(!r.ok) throw new Error(d.error||d); return d;});
+
+const ICONS = {'Coffee':'☕','Non-Coffee':'🧋','Food':'🥐','Add-ons':'➕'};
+
+async function init(){
+  M = await (await fetch('/api/menu')).json();
+  document.title = M.business + ' - Point-of-Sale System';
+  $('biz').textContent = M.business.toUpperCase();
+  $('sub').textContent = 'Point-of-Sale System   |   ' + M.address;
+  $('cashier').textContent = 'Cashier: ' + M.cashier;
+  const pct = Math.round(M.vat_rate*100);
+  $('vat_l').textContent = `VAT (${pct}%)`; $('incl').textContent = `incl. ${pct}% VAT`;
+  $('chips').innerHTML = '';
+  M.categories.forEach((c,i) => { const b = document.createElement('button'); b.className='chip'; b.innerText=(ICONS[c.name]||'')+' '+c.name; b.onclick=()=>{cat=i;drawMenu()}; $('chips').append(b); });
+  $('disc').innerHTML = '<option value="">No discount</option>' + M.discounts.map(d=>`<option>${d}</option>`).join('');
+  $('methods').innerHTML = '';
+  M.methods.forEach(m => { const b = document.createElement('button'); b.textContent=m.name; b.onclick=()=>pickMethod(m,b); $('methods').append(b); });
+  drawMenu(); refresh(); stats(); tick(); setInterval(tick, 30000);
+}
+function tick(){ $('clock').textContent = new Date().toLocaleString('en-PH',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }
+function drawMenu(){
+  [...$('chips').children].forEach((b,i)=>b.classList.toggle('on',i===cat));
+  $('grid').innerHTML = '';
+  M.categories[cat].items.forEach(it => {
+    const d = document.createElement('div'); d.className='tile'+(picked&&picked.name===it.name?' on':'');
+    d.innerHTML = `${it.image?`<img src="${it.image}" alt="">`:''}<div class="info"><div class="name">${it.name}</div><div class="price">${it.sizes.length?'from ':''}${it.price_text}</div></div>`;
+    d.onclick = () => { picked = it; pickedSize = it.sizes.length ? it.sizes[0].label : null; drawSizes(); drawMenu(); };
+    $('grid').append(d);
+  });
+}
+const priceOf = (it,size) => it.price + (it.sizes.find(s=>s.label===size)?.extra || 0);
+function drawSizes(){
+  const el = $('sizes'); el.innerHTML = '';
+  $('picked').textContent = `Selected: ${picked.name}${pickedSize?', '+pickedSize:''} (${peso(priceOf(picked,pickedSize))})`;
+  if(!picked.sizes.length) return;
+  picked.sizes.forEach(s => { const b = document.createElement('button'); b.textContent = `${s.label} ${peso(picked.price+s.extra)}`;
+    if(s.label===pickedSize) b.className='on'; b.onclick = () => { pickedSize = s.label; drawSizes(); }; el.append(b); });
+}
+function bump(n){ $('qty').value = Math.min(99, Math.max(1, (parseInt($('qty').value)||1)+n)); }
+function addItem(){
+  if(!picked) return alert('Please select a menu item first.');
+  const q = parseInt($('qty').value);
+  if(!(q>=1)) return alert('Please enter a whole number for the quantity.');
+  const key = picked.name + (pickedSize ? ` (${pickedSize})` : '');
+  const line = cart.find(l=>l.key===key);
+  if((line?line.qty:0)+q > 99) return alert('The quantity for one item cannot be more than 99.');
+  const price = priceOf(picked, pickedSize);
+  if(line) line.qty += q; else cart.push({key, name:picked.name, size:pickedSize, qty:q, price, price_text:peso(price)});
+  $('qty').value = 1; refresh();
+}
+function removeSel(){ if(selRow===null) return alert('Please select an item in the order to remove.'); cart = cart.filter(l=>l.key!==selRow); selRow=null; refresh(); }
+function clearCart(){ cart=[]; selRow=null; $('disc').value=''; $('qty').value=1; refresh(); }
+const peso = n => '₱' + n.toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+async function refresh(){
+  $('rows').innerHTML=''; $('none').style.display = cart.length?'none':'block';
+  cart.forEach(l=>{ const tr=document.createElement('tr'); if(l.key===selRow) tr.className='sel';
+    tr.innerHTML=`<td style="text-align:left">${l.key}</td><td>${l.qty}</td><td>${l.price_text}</td><td style="text-align:right">${peso(l.price*l.qty)}</td>`;
+    tr.onclick=()=>{selRow=l.key;refresh()}; $('rows').append(tr); });
+  const t = await post('/api/quote',{items:cartItems(), discount:$('disc').value, order_type:$('orderType').value, service:$('serviceMode').value});
+  $('sub_t').textContent=t.subtotal_text; $('vat_t').textContent=t.vat_text; $('disc_t').textContent=t.discount_text; $('tot_t').textContent=t.total_text; $('due').textContent=t.total_text;
+  window.last = t;
+}
+const cartItems = () => cart.map(l=>({name:l.name, qty:l.qty, size:l.size}));
+function openM(id){ $(id).classList.add('show'); } function closeM(id){ $(id).classList.remove('show'); if(id==='rcpt'){clearCart(); stats();} }
+function openPay(){
+  if(!cart.length) return alert('Please add at least one item to the order.');
+  $('p_tot').textContent=last.total_text; $('p_note').textContent=`Subtotal ${last.subtotal_text}${last.discount>0?'  -  Discount '+last.discount_text.slice(1):''}  +  VAT ${Math.round(M.vat_rate*100)}% ${last.vat_text}`;
+  $('p_err').textContent=''; method=null; $('field').value=''; $('field').disabled=true; $('f_hint').textContent='Choose a payment method first.';
+  [...$('methods').children].forEach(b=>b.classList.remove('on')); openM('pay');
+}
+function pickMethod(m,b){ method=m; [...$('methods').children].forEach(x=>x.classList.toggle('on',x===b));
+  $('f_label').textContent=m.label; $('f_hint').textContent=m.hint; $('field').disabled=false; $('field').value=''; $('field').focus(); }
+async function confirmPay(){
+  $('p_err').textContent='';
+  if(!method) return $('p_err').textContent='Please select a payment method.';
+  try{
+    const r = await post('/api/checkout',{items:cartItems(),method:method.name,value:$('field').value,discount:$('disc').value,order_type:$('orderType').value,service:$('serviceMode').value});
+    closeM('pay'); $('r_res').textContent=r.result; $('r_txt').textContent=r.text;
+    $('r_qr').src='/api/qr?text='+encodeURIComponent(r.qr); $('r_pdf').href=`/api/receipt/${r.number}.pdf`; openM('rcpt'); stats();
+  }catch(e){ $('p_err').textContent=e.message; }
+}
+async function stats(){ const s = await (await fetch('/api/stats')).json(); $('st_n').textContent='Transactions: '+s.transactions; $('st_s').textContent='Sales: '+s.sales_text; return s; }
+async function openChart(){
+  const s = await stats(); openM('chart');
+  $('c_sum').textContent = `${s.transactions} transactions   |   Total sales ${s.sales_text}   |   VAT included`;
+  if(!s.transactions){ $('c_body').innerHTML='<div class="empty">No payments yet</div>'; return; }
+  const max = Math.max(...s.methods.map(m=>m.count));
+  $('c_body').innerHTML = '<div style="display:flex;gap:14px;align-items:flex-end;height:140px">'+s.methods.map(m=>`<div style="flex:1;text-align:center"><div style="background:${m.colour};height:${m.count/max*100}px;border-radius:6px"></div><div style="margin-top:6px;font-size:12px">${m.label}</div></div>`).join('')+'</div>'
+    + '<div style="display:flex;gap:12px;margin-top:12px">'+s.methods.map(m=>`<div style="flex:1;text-align:center">${peso(m.sales)}</div>`).join('')+'</div>';
+}
+
+// theme toggle
+const themeToggle = document.getElementById('themeToggle');
+themeToggle.addEventListener('click', ()=>{
+  document.body.classList.toggle('dark');
+  themeToggle.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+});
+
+// helper to populate payment icons
+function renderPaymentButtons(){ $('methods').innerHTML=''; M.methods.forEach(m=>{ const b=document.createElement('button'); b.textContent=m.name; b.onclick=()=>pickMethod(m,b); $('methods').append(b); }); }
+
+document.addEventListener('keydown', e=>{ if(e.key==='Enter' && $('pay').classList.contains('show')) confirmPay(); if(e.key==='Escape') document.querySelectorAll('.modal.show').forEach(m=>m.classList.remove('show')); });
+init();
+</script>
+</body>
+</html>

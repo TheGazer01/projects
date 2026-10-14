@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <rect width="100%" height="100%" fill="#f6efe4"/>
+  <circle cx="200" cy="140" r="72" fill="#6b91c8"/>
+  <text x="200" y="240" font-size="18" font-family="Poppins, sans-serif" fill="#2b1b12" text-anchor="middle">Hot Chocolate</text>
+</svg>
