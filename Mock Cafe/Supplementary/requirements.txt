@@ -1,0 +1,7 @@
+ttkbootstrap
+pillow
+qrcode[pil]
+babel
+rich
+pandas
+matplotlib
